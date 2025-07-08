@@ -1,17 +1,22 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { getProducts, updateProduct } from '../api/fakeProductApi';
 
+// Async thunk to fetch products
 export const fetchProducts = createAsyncThunk('products/fetchProducts', async () => {
   return await getProducts();
 });
 
-export const saveProduct = createAsyncThunk('products/saveProduct', async (product, { rejectWithValue }) => {
-  try {
-    return await updateProduct(product);
-  } catch (error) {
-    return rejectWithValue(error.message);
+// Async thunk to save/update a product
+export const saveProduct = createAsyncThunk(
+  'products/saveProduct',
+  async (product, { rejectWithValue }) => {
+    try {
+      return await updateProduct(product);
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
   }
-});
+);
 
 const productsSlice = createSlice({
   name: 'products',
@@ -39,8 +44,9 @@ const productsSlice = createSlice({
         state.list = action.payload;
       })
       .addCase(saveProduct.fulfilled, (state, action) => {
-        const index = state.list.findIndex(p => p.id === action.payload.id);
-        state.list[index] = action.payload;
+        state.list = state.list.map(p =>
+          p.id === action.payload.id ? action.payload : p
+        );
         state.error = null;
       })
       .addCase(saveProduct.rejected, (state, action) => {

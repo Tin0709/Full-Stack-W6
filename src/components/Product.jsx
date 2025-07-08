@@ -1,19 +1,27 @@
 import { useDispatch, useSelector } from 'react-redux';
 import { changeQuantity, saveProduct } from '../redux/productsSlice';
+import { useState } from 'react';
 
 export default function Product() {
   const dispatch = useDispatch();
   const product = useSelector(state => state.products.selectedProduct);
   const error = useSelector(state => state.products.error);
+  const [statusMessage, setStatusMessage] = useState('');
 
   if (!product) return <div>Select a product</div>;
 
   const handleQuantityChange = (delta) => {
+    setStatusMessage('');
     dispatch(changeQuantity({ id: product.id, delta }));
   };
 
-  const handleSave = () => {
-    dispatch(saveProduct(product));
+  const handleSave = async () => {
+    const resultAction = await dispatch(saveProduct(product));
+    if (saveProduct.fulfilled.match(resultAction)) {
+      setStatusMessage('✅ Product saved successfully!');
+    } else {
+      setStatusMessage(`❌ ${resultAction.payload}`);
+    }
   };
 
   return (
@@ -25,7 +33,9 @@ export default function Product() {
       <button onClick={() => handleQuantityChange(-1)}> - </button>
       <br />
       <button onClick={handleSave}>Save</button>
-      {error && <p style={{ color: 'red' }}>{error}</p>}
+      <div style={{ marginTop: '10px', color: error ? 'red' : 'green' }}>
+        {statusMessage}
+      </div>
     </div>
   );
 }

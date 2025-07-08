@@ -5,19 +5,21 @@ let products = [
 
 export const getProducts = () => {
   return new Promise((resolve) => {
-    setTimeout(() => resolve(products), 500);
+    setTimeout(() => resolve([...products]), 500); // return a shallow copy
   });
 };
 
 export const updateProduct = (updatedProduct) => {
   return new Promise((resolve, reject) => {
     setTimeout(() => {
-      const index = products.findIndex(p => p.id === updatedProduct.id);
       if (updatedProduct.quantity < 0) {
         reject(new Error('Quantity cannot be less than 0'));
       } else {
-        products[index] = { ...products[index], ...updatedProduct };
-        resolve(products[index]);
+        // Make a new copy of the product list with updated product
+        products = products.map(p =>
+          p.id === updatedProduct.id ? { ...p, ...updatedProduct } : p
+        );
+        resolve({ ...updatedProduct }); // return a fresh copy
       }
     }, 500);
   });
